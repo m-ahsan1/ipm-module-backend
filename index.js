@@ -13,10 +13,21 @@ async function main() {
 
 const courseInstructorSchema = new mongoose.Schema({
   course_name:String,
-  preffered_slots:String
+  preferred_slots:[String]
+});
+
+const labInstructorSchema = new mongoose.Schema({
+  lab_name:String,
+  preferred_slots:[String],
+  grade:String,
+  cgpa:String,
+  university:String,
+  industry_experience:String
 });
 
 const CourseInstructor = mongoose.model('CourseInstructor', courseInstructorSchema);
+
+const LabInstructor = mongoose.model('LabInstructor', labInstructorSchema);
 
 const server = express();
 server.use(cors());
@@ -26,12 +37,31 @@ server.post('/demo', async (req, res)=>{
 
   let courseIns = new CourseInstructor();
   courseIns.course_name = req.body.course_name
-  courseIns.preffered_slots = req.body.preferred_slots
+  courseIns.preferred_slots = req.body.preferred_slots
 
   const doc = await courseIns.save()
   console.log(doc)
   res.json(doc)
 })
+
+server.post('/lab', async (req, res)=>{
+
+  let labIns = new LabInstructor();
+  labIns.lab_name = req.body.lab_name
+  labIns.preferred_slots = req.body.preferred_slots
+  labIns.grade = req.body.grade
+  labIns.cgpa = req.body.cgpa
+  labIns.university = req.body.university
+  labIns.industry_experience = req.body.industry_experience
+
+
+
+
+  const doc = await labIns.save()
+  console.log(doc)
+  res.json(doc)
+})
+
 
 server.get('/demo', async (req, res)=>{
   const docs = await CourseInstructor.find({})
