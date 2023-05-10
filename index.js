@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser')
 const mongoose = require('mongoose')
+const fs = require('fs');
 
 main().catch(err => console.log(err));
 
@@ -12,17 +13,23 @@ async function main() {
 }
 
 const courseInstructorSchema = new mongoose.Schema({
-  course_name:String,
-  preferred_slots:[String]
+  name:String,
+  course_names:[String],
+  non_preferred_slots:[String],
+  unavailable_slots:[String],
+
 });
 
 const labInstructorSchema = new mongoose.Schema({
-  lab_name:String,
+
+  name:String,
+  lab_names:[String],
   preferred_slots:[String],
   grade:String,
   cgpa:String,
   university:String,
   industry_experience:String
+
 });
 
 const CourseInstructor = mongoose.model('CourseInstructor', courseInstructorSchema);
@@ -36,29 +43,52 @@ server.use(bodyParser.json())
 server.post('/demo', async (req, res)=>{
 
   let courseIns = new CourseInstructor();
-  courseIns.course_name = req.body.course_name
-  courseIns.preferred_slots = req.body.preferred_slots
+  courseIns.name = req.body.name
+  courseIns.course_names = req.body.course_names
+  courseIns.non_preferred_slots = req.body.non_preferred_slots
+  courseIns.unavailable_slots = req.body.unavailable_slots
+
+
 
   const doc = await courseIns.save()
-  console.log(doc)
+
+  let data = fs.readFileSync('course.json');
+
+  if (data.length === 0) {
+    data = '[]';
+  }
+  const dataArray = JSON.parse(data);
+  const newObj = req.body
+  dataArray.push(newObj);
+  fs.writeFileSync('course.json', JSON.stringify(dataArray));
+  console.log(newObj)
   res.json(doc)
 })
 
 server.post('/lab', async (req, res)=>{
 
   let labIns = new LabInstructor();
-  labIns.lab_name = req.body.lab_name
+  labIns.lab_names = req.body.lab_names
   labIns.preferred_slots = req.body.preferred_slots
   labIns.grade = req.body.grade
   labIns.cgpa = req.body.cgpa
   labIns.university = req.body.university
   labIns.industry_experience = req.body.industry_experience
-
-
-
+  labIns.name = req.body.name
 
   const doc = await labIns.save()
-  console.log(doc)
+
+  let data = fs.readFileSync('lab.json');
+
+  if (data.length === 0) {
+    data = '[]';
+  }
+  const dataArray = JSON.parse(data);
+  const newObj = req.body
+  dataArray.push(newObj);
+  fs.writeFileSync('lab.json', JSON.stringify(dataArray));
+
+  console.log(newObj)
   res.json(doc)
 })
 
